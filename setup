@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set -e
+
+ln -sf "$PWD/nvim/" "$HOME/.config"/nvim
+
+echo "🚀 Starting dotfiles setup..."
+
+# Check if Homebrew is installed
+if ! command -v brew &> /dev/null; then
+    echo "📦 Homebrew not found. Installing Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+else
+    echo "✅ Homebrew is already installed"
+fi
+
+# Update Homebrew
+echo "🔄 Updating Homebrew..."
+brew update
+
+
+# Install neovim
+echo "📥 Installing neovim..."
+brew install neovim
+
+echo "✅ Installation complete!"
+echo ""
+echo "📋 Installed tools:"
+echo "  - neovim: $(nvim --version | head -n 1)"
+echo ""
+echo "🎉 Setup finished successfully!"
