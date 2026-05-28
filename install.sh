@@ -37,6 +37,7 @@ fi
 # Get the directory where this script is located
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ZSHRC_SOURCE="$SCRIPT_DIR/.zshrc"
+NVIM_SOURCE="$SCRIPT_DIR/nvim"
 
 # Create symlink for .zshrc
 echo "🔗 Creating symlink for .zshrc..."
@@ -52,6 +53,22 @@ fi
 
 ln -sf "$ZSHRC_SOURCE" "$HOME/.zshrc"
 echo "✅ Symlink created: ~/.zshrc -> $ZSHRC_SOURCE"
+
+# Create symlink for nvim config
+echo "🔗 Creating symlink for nvim config..."
+if [ ! -d "$NVIM_SOURCE" ]; then
+    echo "⚠️  Error: nvim directory not found at $NVIM_SOURCE"
+else
+    mkdir -p "$HOME/.config"
+    
+    if [ -d "$HOME/.config/nvim" ] && [ ! -L "$HOME/.config/nvim" ]; then
+        echo "📦 Backing up existing nvim config to nvim.backup"
+        mv "$HOME/.config/nvim" "$HOME/.config/nvim.backup"
+    fi
+    
+    ln -sf "$NVIM_SOURCE" "$HOME/.config/nvim"
+    echo "✅ Symlink created: ~/.config/nvim -> $NVIM_SOURCE"
+fi
 
 # Source the new .zshrc to setup Homebrew
 echo "🔧 Sourcing .zshrc..."
