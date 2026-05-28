@@ -34,48 +34,34 @@ else
     echo "✅ zsh is already the default shell"
 fi
 
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ZSHRC_SOURCE="$SCRIPT_DIR/.zshrc"
+
 # Create symlink for .zshrc
 echo "🔗 Creating symlink for .zshrc..."
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DOTFILES_DIR="$(dirname "$SCRIPT_DIR")"
-ZSHRC_SOURCE="$DOTFILES_DIR/.zshrc"
-
 if [ ! -f "$ZSHRC_SOURCE" ]; then
-    echo "⚠️  Warning: .zshrc not found in $DOTFILES_DIR"
-    echo "   Please ensure .zshrc exists in your dotfiles directory"
-else
-    if [ -f "$HOME/.zshrc" ] && [ ! -L "$HOME/.zshrc" ]; then
-        echo "📦 Backing up existing .zshrc to .zshrc.backup"
-        mv "$HOME/.zshrc" "$HOME/.zshrc.backup"
-    fi
-    
-    ln -sf "$ZSHRC_SOURCE" "$HOME/.zshrc"
-    echo "✅ Symlink created: ~/.zshrc -> $ZSHRC_SOURCE"
+    echo "⚠️  Error: .zshrc not found at $ZSHRC_SOURCE"
+    exit 1
 fi
 
-# Add Homebrew to PATH for Linux/DevPod in .zshrc
-echo "🔧 Configuring Homebrew PATH in .zshrc..."
-if [ -f "/home/linuxbrew/.linuxbrew/bin/brew" ]; then
-    BREW_SHELLENV='eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)"'
-    
-    if [ -f "$HOME/.zshrc" ]; then
-        if ! grep -q "brew shellenv" "$HOME/.zshrc"; then
-            echo >> "$HOME/.zshrc"
-            echo "$BREW_SHELLENV" >> "$HOME/.zshrc"
-            echo "✅ Added Homebrew to .zshrc"
-        else
-            echo "✅ Homebrew already in .zshrc"
-        fi
-    fi
-    
-    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)"
+if [ -f "$HOME/.zshrc" ] && [ ! -L "$HOME/.zshrc" ]; then
+    echo "📦 Backing up existing .zshrc to .zshrc.backup"
+    mv "$HOME/.zshrc" "$HOME/.zshrc.backup"
 fi
+
+ln -sf "$ZSHRC_SOURCE" "$HOME/.zshrc"
+echo "✅ Symlink created: ~/.zshrc -> $ZSHRC_SOURCE"
+
+# Source the new .zshrc to setup Homebrew
+echo "🔧 Sourcing .zshrc..."
+source "$HOME/.zshrc" || true
 
 # Check if Homebrew is installed
 if ! command -v brew &> /dev/null; then
     echo "📦 Homebrew not found. Installing Homebrew..."
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-    eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv zsh)"
+    source "$HOME/.zshrc"
 else
     echo "✅ Homebrew is already installed"
 fi
